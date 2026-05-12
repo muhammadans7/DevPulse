@@ -1,0 +1,5 @@
+TOKEN_TYPE_BEARER = "bearer"
+PASSWORD_HASH_SCHEME = "bcrypt"
+API_KEY_PREFIX = "dp_"
+API_KEY_LENGTH = 32
+GITHUB_TOKEN_FIELD = "github_access_token"

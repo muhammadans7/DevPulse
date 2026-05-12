@@ -1,0 +1,7 @@
+API_V1_PREFIX = "/api/v1"
+PROJECT_TITLE = "DevPulse"
+PROJECT_DESCRIPTION = "Multi-tenant GitHub activity analytics API"
+PROJECT_VERSION = "1.0.0"
+DOCS_URL = "/docs"
+REDOC_URL = "/redoc"
+OPENAPI_URL = "/openapi.json"

@@ -1,0 +1,8 @@
+GITHUB_API_BASE_URL = "https://api.github.com"
+GITHUB_OAUTH_AUTHORIZE_URL = "https://github.com/login/oauth/authorize"
+GITHUB_OAUTH_TOKEN_URL = "https://github.com/login/oauth/access_token"
+GITHUB_SCOPES = "repo read:org read:user"
+GITHUB_RATE_LIMIT_ENDPOINT = "/rate_limit"
+GITHUB_USER_ENDPOINT = "/user"
+GITHUB_USER_REPOS_ENDPOINT = "/user/repos"
+GITHUB_REPO_COMMITS_ENDPOINT = "/repos/{owner}/{repo}/commits"
