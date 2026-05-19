@@ -234,6 +234,4 @@ Set all environment variables from `.env.example` in your platform's dashboard. 
 
 ---
 
-## License
 
-MIT
