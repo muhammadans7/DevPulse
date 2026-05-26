@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from app.api.v1.router import router as v1_router
 from app.constants.api import (
+    API_V1_PREFIX,
     DOCS_URL,
     OPENAPI_URL,
     PROJECT_DESCRIPTION,
@@ -29,7 +31,7 @@ def create_app() -> FastAPI:
         openapi_url=OPENAPI_URL,
         lifespan=lifespan,
     )
-
+    app.include_router(v1_router, prefix=API_V1_PREFIX)
     return app
 
 

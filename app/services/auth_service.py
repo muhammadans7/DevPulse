@@ -6,6 +6,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from app.config import settings
 from app.constants.auth import (
+    GITHUB_STATE_EXPIRE_MINUTES,
     JWT_EXPIRY_FIELD,
     JWT_SUBJECT_FIELD,
     PASSWORD_HASH_SCHEME,
@@ -54,12 +55,32 @@ def decode_access_token(token: str) -> uuid.UUID:
         raise ValueError("Invalid or expired token") from exc # raise here caught in routes
 
 
-def build_github_oauth_url() -> str:
+def create_github_state_token(user_id: uuid.UUID) -> str:
+    """Create a short-lived signed token encoding user_id — used as OAuth state param."""
+    expire = utc_now() + timedelta(minutes=GITHUB_STATE_EXPIRE_MINUTES)
+    payload = {JWT_SUBJECT_FIELD: str(user_id), JWT_EXPIRY_FIELD: expire}
+    return jwt.encode(payload, settings.secret_key, algorithm=settings.algorithm)
+
+
+def decode_github_state_token(state: str) -> uuid.UUID:
+    """Decode the OAuth state param back to a user_id, or raise ValueError if invalid."""
+    try:
+        payload = jwt.decode(state, settings.secret_key, algorithms=[settings.algorithm])
+        user_id: str | None = payload.get(JWT_SUBJECT_FIELD)
+        if user_id is None:
+            raise ValueError("State token missing subject")
+        return uuid.UUID(user_id)
+    except JWTError as exc:
+        raise ValueError("Invalid or expired state token") from exc
+
+
+def build_github_oauth_url(state: str) -> str:
     """Build the GitHub authorization URL the user is redirected to."""
     params = urlencode({
         "client_id": settings.github_client_id,
         "redirect_uri": settings.github_redirect_uri,
         "scope": GITHUB_SCOPES,
+        "state": state,
     })
     return f"{GITHUB_OAUTH_AUTHORIZE_URL}?{params}"
 
