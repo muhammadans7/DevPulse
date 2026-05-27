@@ -1,4 +1,5 @@
 API_V1_PREFIX = "/api/v1"
+AUTH_TOKEN_URL = "/api/v1/auth/login"
 PROJECT_TITLE = "DevPulse"
 PROJECT_DESCRIPTION = "Multi-tenant GitHub activity analytics API"
 PROJECT_VERSION = "1.0.0"
