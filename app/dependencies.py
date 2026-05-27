@@ -2,8 +2,8 @@ import uuid
 from typing import Annotated
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
+from sqlmodel.ext.asyncio.session import AsyncSession
 from app.constants.api import AUTH_TOKEN_URL
 from app.db.session import get_session
 from app.models.user import User
