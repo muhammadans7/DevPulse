@@ -1,15 +1,28 @@
-import uuid 
+import uuid
 from typing import Annotated
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Query, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.constants.api import AUTH_TOKEN_URL
+from app.constants.pagination import DEFAULT_PAGE, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
 from app.db.session import get_session
 from app.models.user import User
 from app.services.auth_service import decode_access_token
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=AUTH_TOKEN_URL)
+
+
+class PaginationParams:
+    """Shared query-param dependency for all paginated list endpoints."""
+
+    def __init__(
+        self,
+        page: int = Query(default=DEFAULT_PAGE, ge=1),
+        size: int = Query(default=DEFAULT_PAGE_SIZE, ge=1, le=MAX_PAGE_SIZE),
+    ) -> None:
+        self.page = page
+        self.size = size
 
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
