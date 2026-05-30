@@ -6,16 +6,23 @@ from sqlalchemy.exc import IntegrityError
 from sqlmodel import func , select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.models.org import OrgMembership, OrgRole, Organization
+from app.models.repo import CommitSnapshot, Repo
 
 async def create_org(
-    session : AsyncSession,
+    session: AsyncSession,
     payload: OrgCreate,
     created_id: uuid.UUID,
-) -> Organization :
+) -> Organization:
     """Create org and enroll the creator as admin in one transaction"""
-    org = Organization(name=payload.name , slug=payload.slug)
-    membership = OrgMembership(user_id=created_id, org_id=org.id, role=OrgRole.ADMIN)
+    org = Organization(name=payload.name, slug=payload.slug)
     session.add(org)
+    try:
+        await session.flush()
+    except IntegrityError:
+        await session.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="An org with this slug already exists")
+
+    membership = OrgMembership(user_id=created_id, org_id=org.id, role=OrgRole.ADMIN)
     session.add(membership)
     await session.commit()
     await session.refresh(org)
@@ -141,11 +148,19 @@ async def remove_member(
 
 
 async def delete_org(session: AsyncSession, org: Organization) -> None:
-    """Delete org after clearing memberships to satisfy FK constraints."""
-    members_result = await session.exec(
-        select(OrgMembership).where(OrgMembership.org_id == org.id)
-    )
+    """Delete org after clearing child rows in FK order: snapshots → repos → memberships → org."""
+    repos_result = await session.exec(select(Repo).where(Repo.org_id == org.id))
+    for repo in repos_result.all():
+        snapshots_result = await session.exec(
+            select(CommitSnapshot).where(CommitSnapshot.repo_id == repo.id)
+        )
+        for s in snapshots_result.all():
+            await session.delete(s)
+        await session.delete(repo)
+
+    members_result = await session.exec(select(OrgMembership).where(OrgMembership.org_id == org.id))
     for m in members_result.all():
         await session.delete(m)
+
     await session.delete(org)
     await session.commit()

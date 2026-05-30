@@ -2,7 +2,6 @@ import math
 import uuid 
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.exc import IntegrityError
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.db.session import get_session
 from app.dependencies import PaginationParams, get_current_user
@@ -20,11 +19,7 @@ async def create_org(
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> OrgResponse:
     """Create a new organization. The caller becomes its admin."""
-    try:
-        org = await org_service.create_org(session, payload, current_user.id)
-    except IntegrityError:
-        await session.rollback()
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="An org with this slug already exists")
+    org = await org_service.create_org(session, payload, current_user.id)
     return OrgResponse.model_validate(org)
 
 

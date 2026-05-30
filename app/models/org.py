@@ -8,16 +8,16 @@ from app.utils.datetime import utc_now
 class OrgPlan(str, Enum):
     """Subscription plans available for an organization."""
 
-    FREE = "free"
-    PRO = "pro"
-    ENTERPRISE = "enterprise"
+    FREE = "FREE"
+    PRO = "PRO"
+    ENTERPRISE = "ENTERPRISE"
 
 
 class OrgRole(str, Enum):
     """Roles a user can hold within an organization."""
 
-    ADMIN = "admin"
-    MEMBER = "member"
+    ADMIN = "ADMIN"
+    MEMBER = "MEMBER"
 
 
 class Organization(SQLModel, table=True):
